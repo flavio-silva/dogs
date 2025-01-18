@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('age');
             $table->unsignedSmallInteger('weight');
             $table->string('path');
+            $table->unsignedInteger('views_count')->default(0);
             $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });

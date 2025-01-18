@@ -12,6 +12,8 @@ class DogPhotoController extends Controller
     public function index(Request $request)
     {
         $collection = QueryBuilder::for(DogPhoto::class)
+        ->withCount(['comments'])
+        ->with('owner:id,name')
             ->allowedFilters('name', 'age', 'weight', 'owner_id')
             ->allowedSorts('created_at')
             ->paginate();
@@ -21,6 +23,11 @@ class DogPhotoController extends Controller
 
     public function show(DogPhoto $photo)
     {
+        $photo->load(['comments', 'owner:id,name']);
+        
+        $photo->views_count = $photo->views_count + 1;
+        $photo->save();
+        
         $photo->photo_url = Storage::disk('public')->url($photo->path);
 
         return $photo;
