@@ -12,6 +12,6 @@ class Comment extends Model
 
     public function photo()
     {
-        return $this->belongsTo(DogPhoto::class);
+        return $this->belongsTo(DogPhoto::class, 'dog_photo_id');
     }
 }

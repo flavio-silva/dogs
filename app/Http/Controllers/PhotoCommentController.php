@@ -19,9 +19,7 @@ class PhotoCommentController extends Controller
             'comment' => ['required', 'string', 'min:4', 'max:255'],
         ]);
 
-        $comment = new Comment($data);
-        $comment->photo()->associate($photo);
-        $comment->save();
+        $comment = $photo->comments()->create($data);
 
         return $comment;   
     }
