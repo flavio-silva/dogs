@@ -13,8 +13,8 @@ Route::get('/user', function (Request $request) {
 
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::post('/{photo}/ comments/', [PhotoCommentController::class, 'store']);
-    Route::get('/{photo}/ comments/', [PhotoCommentController::class, 'index']);
+    Route::post('/photos/{photo}/comments', [PhotoCommentController::class, 'store']);
+    Route::get('/photos/{photo}/comments', [PhotoCommentController::class, 'index']);
 
     Route::resource('photos', DogPhotoController::class);
 });
