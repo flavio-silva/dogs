@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\DogPhotoResource;
 use App\Models\DogPhoto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -16,14 +18,16 @@ class DogPhotoController extends Controller
         ->with('owner:id,name')
             ->allowedFilters('name', 'age', 'weight', 'owner_id')
             ->allowedSorts('created_at')
-            ->paginate();
+            ->defaultSort('-created_at')
+            ->jsonPaginate();
 
-        return $collection;
+        return DogPhotoResource::collection($collection);
     }
 
     public function show(DogPhoto $photo)
     {
-        $photo->load(['comments', 'owner:id,name']);
+
+        $photo->load(['comments.author', 'owner:id,name']);
         
         $photo->views_count = $photo->views_count + 1;
         $photo->save();
@@ -36,7 +40,7 @@ class DogPhotoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'photo' => ['required', 'image', 'max:1024'],
+            'photo' => ['required', 'image', 'max:20480'],
             'name' => ['required', 'string', 'max:255'],
             'weight' => ['required', 'numeric', 'min:0'],
             'age' => ['required', 'integer', 'min:0', 'max:40'],
@@ -81,6 +85,8 @@ class DogPhotoController extends Controller
 
     public function destroy(DogPhoto $photo)
     {
+        Gate::authorize('delete', $photo);
+        
         Storage::disk('public')->delete($photo->path);
         $photo->delete();
         return response()->noContent();

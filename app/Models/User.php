@@ -56,4 +56,9 @@ class User extends Authenticatable
             set: fn ($value) => bcrypt($value),
         );
     }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'author_id')->latest();
+    }
 }
