@@ -17,7 +17,7 @@ class AuthController extends Controller
 
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response([
-                'message' => 'Invalid credentials'
+                'message' => 'Email e/ou senha inválido(s)'
             ], 401);
         }
 
@@ -44,6 +44,7 @@ class AuthController extends Controller
 
         return [
             'token' => $token,
+            'user' => $user,
         ];
     }
 }
