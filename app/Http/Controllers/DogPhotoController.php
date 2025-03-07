@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DogPhotoResource;
 use App\Models\DogPhoto;
+use App\Notifications\NewPhotoCommentNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -27,10 +28,10 @@ class DogPhotoController extends Controller
     public function show(DogPhoto $photo)
     {
         $photo->load(['comments.author', 'owner:id,name']);
-        
+
         $photo->views_count = $photo->views_count + 1;
         $photo->save();
-        
+
         $photo->photo_url = Storage::disk('public')->url($photo->path);
 
         return $photo;
@@ -50,14 +51,18 @@ class DogPhotoController extends Controller
         // $path = $request->file('photo')->storePublicly('photos');
 
         $path = Storage::disk('public')->put('photos', $request->file('photo'));
-        
+
         $photo = new DogPhoto($data);
         $photo->owner()->associate($request->user());
         $photo->path = $path;
         $photo->save();
 
+        $photo->owner->notify(new NewPhotoCommentNotification($photo));
+
         $photo->photo_url = Storage::disk('public')->url($path);
         return $photo;
+
+
     }
 
     public function update(DogPhoto $photo, Request $request)
@@ -72,7 +77,7 @@ class DogPhotoController extends Controller
         Storage::delete($photo->path);
 
         $path = $request->file('photo')->storePublicly('photos');
-        
+
         $photo = $photo->fill($data);
         $photo->owner()->associate($request->user());
         $photo->path = $path;
@@ -85,7 +90,7 @@ class DogPhotoController extends Controller
     public function destroy(DogPhoto $photo)
     {
         Gate::authorize('delete', $photo);
-        
+
         Storage::disk('public')->delete($photo->path);
         $photo->delete();
         return response()->noContent();
