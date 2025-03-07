@@ -26,7 +26,6 @@ class DogPhotoController extends Controller
 
     public function show(DogPhoto $photo)
     {
-
         $photo->load(['comments.author', 'owner:id,name']);
         
         $photo->views_count = $photo->views_count + 1;
